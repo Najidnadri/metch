@@ -1,7 +1,30 @@
-<h1 align="center">Metch</h1>
+<h1 align="center">metch-case</h1>
 
 <p align="center">
 Metch is a TypeScript package that provides utility functions for branching and conditional execution based on patterns. It allows you to define multiple branches, evaluate an item against these branches, and execute the corresponding callbacks based on the matching branch.
+</p>
+
+<p align="center">
+  <a href="https://github.com/najidnadri/metch/blob/master/LICENSE">
+    <img
+      alt="MIT license"
+      src="https://img.shields.io/npm/l/metch-case?style=plastic"
+    /></a>
+  <a href="https://www.npmjs.com/package/metch-case">
+    <img
+      alt="Downloads per week"
+      src="https://img.shields.io/npm/dw/metch-case?style=plastic"
+    /></a>
+  <a href="https://bundlephobia.com/result?p=metch-case">
+    <img
+      alt="npm bundle size"
+      src="https://img.shields.io/bundlephobia/minzip/metch-case?style=plastic"
+    /></a>
+  <a href="https://www.npmjs.com/package/metch-case">
+    <img
+      alt="Version"
+      src="https://img.shields.io/npm/v/metch-case?style=plastic"
+    /></a>
 </p>
 
 # Installation
@@ -17,7 +40,7 @@ yarn add metch
 # Usage
 To use Metch in your TypeScript project, import the desired functions from the package:
 ```typescript
-import { metch, metchReturn, DefaultBranch } from 'metch';
+import { metch, metchReturn, DefaultBranch } from 'metch-case';
 ```
 
 ## `metch()`
@@ -32,7 +55,7 @@ metch<T>(item: T, branches: MatchBranches<T>): void | Promise<void>
 
 ### Example
 ```typescript
-import { metch, DefaultBranch } from 'metch';
+import { metch, DefaultBranch } from 'metch-case';
 import fs from "fs/promises"
 
 let filePath: string | undefined = 'notValid.txt';
@@ -69,7 +92,7 @@ metchReturn<T, U>(item: T, branches: MatchReturnBranches<T, U>, defaultBranch: M
 
 ### Example
 ```typescript
-import { metchReturn } from 'metch';
+import { metchReturn } from 'metch-case';
 import fs from "fs/promises"
 
 let filePath: string | undefined = 'animal.txt';
@@ -91,4 +114,3 @@ const fileData = await metchReturn(filePath, [
 
 console.log(fileData);
 ```
-

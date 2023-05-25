@@ -1,7 +1,7 @@
 {
-  "name": "metch",
+  "name": "metch-case",
   "author": "Najid Nadri <muhd.najid.nadri@gmail.com> (https://www.linkedin.com/in/muhdnajidnadri/)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Switch case on steroid. Enhanced branching with simplified syntax and support for conditional functions.",
   "keywords": [
     "case",
