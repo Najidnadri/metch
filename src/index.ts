@@ -36,7 +36,7 @@ type MatchBranches<T> = MatchBranch<T, void>[]
  * 
  * ### Example
  * ```
- * import {metch, DefaultBranch} from 'metch';
+ * import {metch, DefaultBranch} from 'metch-case';
  * import fs from "fs/promises"
  * 
  *  let filePath: string | undefined = 'notValid.txt';
@@ -93,7 +93,7 @@ type MatchReturnDefaultbranch<T, U> = BranchCallbackBuilder<T, U>;
  * 
  * ### Example
  * ```
- *  import {metchReturn} from 'metch';
+ *  import {metchReturn} from 'metch-case';
  *  import fs from "fs/promises"
  * 
  *  let filePath: string | undefined = 'animal.txt';
