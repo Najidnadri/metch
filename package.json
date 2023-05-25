@@ -1,0 +1,47 @@
+{
+  "name": "metch",
+  "author": "Najid Nadri <muhd.najid.nadri@gmail.com> (https://www.linkedin.com/in/muhdnajidnadri/)",
+  "version": "1.0.0",
+  "description": "Switch case on steroid. Enhanced branching with simplified syntax and support for conditional functions.",
+  "keywords": [
+    "case",
+    "match",
+    "pattern",
+    "switch",
+    "pattern-matching",
+    "switch-case"
+  ],
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "homepage": "https://github.com/Najidnadri/metch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Najidnadri/metch"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "index.d.ts",
+    "package.json"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "bugs": {
+    "url": "https://github.com/Najidnadri/metch/issues",
+    "email": "muhd.najid.nadri@gmail.com"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.2.3",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "eslint": "^8.39.0",
+    "typescript": "^5.0.4"
+  }
+}
