@@ -5,7 +5,7 @@ enum DefaultBranch {
 type BranchCallbackBuilder<T, U> = ((item: T) => U) | ((item: T) => Promise<U>);
 
 type MatchBranchBuilder<T, U> = [
-    BranchJudge<T> | T | DefaultBranch.Default,
+    BranchJudge<T> | T | boolean | DefaultBranch.Default,
     BranchCallbackBuilder<T, U>
 ]
 
@@ -66,6 +66,7 @@ function metch<T>(item: T, branches: MatchBranches<T>) {
         if (
             (isFunction(branch[0]) && branch[0](item)) ||
             item === branch[0] ||
+            branch[0] === true ||
             branch[0] === DefaultBranch.Default
         ) {
             return branch[1](item);
@@ -77,7 +78,7 @@ function metch<T>(item: T, branches: MatchBranches<T>) {
 
 type MatchReturnBranches<T, U> = MatchReturnBranch<T, U>[];
 type MatchReturnBranch<T, U> = [
-    BranchJudge<T> | T,
+    BranchJudge<T> | T | boolean,
     BranchCallbackBuilder<T, U>
 ]
 type MatchReturnDefaultbranch<T, U> = BranchCallbackBuilder<T, U>;
@@ -132,7 +133,7 @@ function metchReturn<T, U>(item: T, branches: MatchReturnBranches<T, U>, default
         if (
             (isFunction(branch[0]) && branch[0](item)) ||
             item === branch[0] ||
-            branch[0] === DefaultBranch.Default
+            branch[0] === true 
         ) {
             return branch[1](item);
         } 
@@ -150,6 +151,6 @@ export {
 /*
 UTILS
 */
-function isFunction<T>(branch: BranchJudge<T> | T | DefaultBranch.Default): branch is BranchJudge<T> {
+function isFunction<T>(branch: BranchJudge<T> | T | DefaultBranch.Default | boolean): branch is BranchJudge<T> {
     return typeof branch === 'function'
 }

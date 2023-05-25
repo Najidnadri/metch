@@ -5,7 +5,7 @@ Metch is a TypeScript package that provides utility functions for branching and 
 </p>
 
 <p align="center">
-  <a href="https://github.com/najidnadri/metch/blob/master/LICENSE">
+  <a href="https://github.com/najidnadri/metch-case/blob/master/LICENSE">
     <img
       alt="MIT license"
       src="https://img.shields.io/npm/l/metch-case?style=plastic"

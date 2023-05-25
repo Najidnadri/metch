@@ -1,7 +1,7 @@
 {
   "name": "metch-case",
   "author": "Najid Nadri <muhd.najid.nadri@gmail.com> (https://www.linkedin.com/in/muhdnajidnadri/)",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Switch case on steroid. Enhanced branching with simplified syntax and support for conditional functions.",
   "keywords": [
     "case",
@@ -12,11 +12,11 @@
     "switch-case"
   ],
   "main": "./dist/index.js",
-  "types": "./index.d.ts",
-  "homepage": "https://github.com/Najidnadri/metch",
+  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/Najidnadri/metch-case",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Najidnadri/metch"
+    "url": "https://github.com/Najidnadri/metch-case"
   },
   "files": [
     "dist",
@@ -28,7 +28,7 @@
     "node": ">=10"
   },
   "bugs": {
-    "url": "https://github.com/Najidnadri/metch/issues",
+    "url": "https://github.com/Najidnadri/metch-case/issues",
     "email": "muhd.najid.nadri@gmail.com"
   },
   "scripts": {
