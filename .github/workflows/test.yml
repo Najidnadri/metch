@@ -1,0 +1,28 @@
+name: Run Tests and Lintings
+
+on:
+  pull_request:
+    branches:
+      - main  # Adjust the branch name if needed
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Specify the desired operating system
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16  # Adjust the Node.js version if needed
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Run linting
+        run: npm run lint
