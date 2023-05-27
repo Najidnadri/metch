@@ -1,7 +1,7 @@
 {
   "name": "metch-case",
   "author": "Najid Nadri <muhd.najid.nadri@gmail.com> (https://www.linkedin.com/in/muhdnajidnadri/)",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Switch case on steroid. Enhanced branching with simplified syntax and support for conditional functions.",
   "keywords": [
     "case",
@@ -32,6 +32,7 @@
     "build": "npx tsc",
     "lint": "eslint . --ext .ts",
     "test": "jest --coverage",
+    "publish": "npm run build && npm public --access public",
     "lint-and-fix": "eslint . --ext .ts --fix"
   },
   "license": "MIT",
