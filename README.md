@@ -48,14 +48,17 @@ The `metch` function evaluates an item against a set of branches and executes th
 
 ### Syntax
 ```typescript
-metch<T>(item: T, branches: MatchBranches<T>): void | Promise<void>
+metch<T>(item: T, branches: MatchBranches<T>, defaultBranch?: MetchBranchCallback<T>): void | Promise<void>
 ```
 * `item`: The item to be evaluated against the branches.
-* `branches`: An array of `MatchBranch` objects. Each `MatchBranch` consists of a branch judge or value, and a callback function to be executed if the judge or value matches the item.
+* `branches`: An array of `MatchBranch` objects. Each `MatchBranch` is an array of 2 items:-
+    * `BranchJudge`: will evaluate the item given. a `judge` can be a **boolean**, or a **value of the same type as item**, or a **function that returns a boolean**
+    * `BranchCallback`: will execute if the judge allows it. Can be both async and sync.
+* `defaultBranch`: Optional default branch if all other branches not matched.
 
 ### Example
 ```typescript
-import { metch, DefaultBranch } from 'metch-case';
+import {metch, DefaultBranch} from 'metch-case';
 import fs from "fs/promises"
 
 let filePath: string | undefined = 'notValid.txt';
@@ -69,12 +72,11 @@ await metch(filePath, [
     }], 
     [path => path!.includes('.txt'), async (file) => {
         console.log(await fs.readFile('data.txt', "utf-8"));
-    }], 
-    [DefaultBranch.Default, async (item) => {
-        // Default branch must be placed at the last index
-        console.log(await fs.readFile('default.txt', 'utf-8'))
-    }]  
-]);
+    }]
+], async (item) => {
+  // Optional Default branch 
+  console.log(await fs.readFile('default.txt', 'utf-8'))
+})
 ```
 
 ## `metchReturn()`
