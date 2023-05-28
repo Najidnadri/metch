@@ -8,7 +8,7 @@ type BranchCallbackBuilder<T, U> = ((item: T) => U) | ((item: T) => Promise<U>);
  * * A value of the same type as `item`.
  * * A `boolean`.
  */
-export type BranchJudge<T> = ((item: T) => boolean) | T | boolean;
+export type BranchJudge<T> = ((item: T) => boolean | undefined) | T | boolean | Query<T>;
 
 /**
  * A function that will be executed if a branch's `judge` allow it.
@@ -71,11 +71,7 @@ export type MetchBranches<T> = MetchBranch<T>[]
  */
 export function metch<T>(item: T, branches: MetchBranches<T>, defaultBranch?: MetchBranchCallback<T>) {
     for (const branch of branches) {
-        if (
-            (judgeIsFunction(branch[0]) && branch[0](item)) ||
-            item === branch[0] ||
-            (judgeIsBoolean(branch[0]) && branch[0] === true)
-        ) {
+        if (evalJudge(item, branch[0])) {
             return branch[1](item);
         }
     }
@@ -153,11 +149,7 @@ export type MetchReturnBranches<T, U> = MetchReturnBranch<T, U>[];
  */
 export function metchReturn<T, U>(item: T, branches: MetchReturnBranches<T, U>, defaultBranch: MetchReturnBranchCallback<T, U>): U | Promise<U> {
     for (const branch of branches) {
-        if (
-            (judgeIsFunction(branch[0]) && branch[0](item)) ||
-            item === branch[0] ||
-            (judgeIsBoolean(branch[0]) && branch[0] === true)
-        ) {
+        if (evalJudge(item, branch[0])) {
             return branch[1](item);
         }
     }
@@ -166,12 +158,149 @@ export function metchReturn<T, U>(item: T, branches: MetchReturnBranches<T, U>, 
 }
 
 /*
+ QUERY
+*/
+interface AndQuery<T> {
+    type: 'AND',
+    judges: BranchJudge<T>[]
+}
+
+interface OrQuery<T> {
+    type: 'OR',
+    judges: BranchJudge<T>[]
+}
+
+/**
+ * Act as `AND` / `OR` operator for a branch's judge.
+ *
+ * ## Example
+ * ```
+ * const branches: MetchBranches<any> = [
+ *      [Query.Or<any>(undefined, null, 1, (path: any) => typeof path !== 'string'), () => {
+ *          console.log('value is not a valid string')
+ *      }],
+ *      [Query.And((path: any) => typeof path === 'string', 'animal'), (item) => {
+ *          console.log('value is a string and animal')
+ *      }],
+ * ];
+ *
+ * await metch('animal' as any, branches, (item) => {
+ *      console.log('default branch')
+ * });
+ * ```
+ *
+ * ## Note
+ * It is recommended to pass the `item`'s data type when using the `Query`.
+ * ```
+ * let item: string | undefined = 'hello world';
+ * Query.And<string | undefined>(...);
+ * Query.Or<string | null>(...);
+ * ```
+ */
+export class Query<T> {
+    private query: AndQuery<T> | OrQuery<T>;
+
+    private constructor(type: 'OR' | 'AND', ...judges: BranchJudge<T>[]) {
+        this.query = {
+            type: type,
+            judges: judges
+        };
+    }
+
+    /**
+     * ## Example
+     * ```
+     * let filePath: string | undefined = returnStringUndefined(undefined);
+     * await metch(filePath, [
+     *      [Query.Or<string | undefined>('animal.log', 'animal.txt', path => path?.includes('.txt')), async (file) => {
+     *          console.log('value is either "animal.log", "animal.txt" or includes ".txt"');
+     *      }],
+     * ], async (item) => {
+     *      throw new Error('file not found');
+     * });
+     * ```
+     * @param judges `...BranchJudge<T>`
+     * @returns
+     */
+    static Or<T>(...judges: BranchJudge<T>[]): Query<T> {
+        return new Query('OR', ...judges);
+    }
+
+    /**
+     * ## Example
+     * ```
+     * let filePath: string | undefined = returnStringUndefined('animal.txt');
+     * await metch(filePath, [
+     *      [Query.And<string | undefined>('animal.txt', path => path?.includes('.txt')), async (file) => {
+     *          console.log('value is "animal.txt" and includes ".txt"');
+     *      }],
+     * ], async (item) => {
+     *      throw new Error('file not found');
+     * });
+     * ```
+     * @param judges
+     * @returns
+     */
+    static And<T>(...judges: BranchJudge<T>[]): Query<T> {
+        return new Query('AND', ...judges);
+    }
+
+    /**
+     * Evaluate the `item` given with this `Query`
+     * @param item - to be evaluated
+     * @returns
+     */
+    evaluate(item: T): boolean {
+        if (Query.isAnd(this.query)) {
+            return Query.evaluateAnd(item, this.query);
+        } else {
+            return Query.evaluateOr(item, this.query);
+        }
+    }
+
+    private static evaluateAnd<T>(item: T, query: AndQuery<T>): boolean {
+        for (const judge of query.judges) {
+            if (evalJudge(item, judge) === false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static evaluateOr<T>(item: T, query: OrQuery<T>): boolean {
+        for (const judge of query.judges) {
+            if (evalJudge(item, judge) === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static isAnd<T>(query: AndQuery<T> | OrQuery<T>): query is AndQuery<T> {
+        return query.type === 'AND';
+    }
+}
+
+/*
 UTILS
 */
-function judgeIsFunction<T>(judge: ((item: T) => boolean) | T | boolean): judge is ((item: T) => boolean) {
+function evalJudge<T>(item: T, judge: BranchJudge<T>): boolean {
+    return (
+        (judgeIsFunction(judge) && judge(item)) ||
+        item === judge ||
+        (judgeIsBoolean(judge) && judge === true) ||
+        (judgeIsQuery(judge) && judge.evaluate(item))
+    );
+}
+
+function judgeIsFunction<T>(judge: ((item: T) => boolean | undefined) | T | boolean | Query<T>): judge is ((item: T) => boolean) {
     return typeof judge === 'function';
 }
 
-function judgeIsBoolean<T>(judge: ((item: T) => boolean) | T | boolean): judge is boolean {
+function judgeIsBoolean<T>(judge: ((item: T) => boolean | undefined) | T | boolean | Query<T>): judge is boolean {
     return typeof judge === 'boolean';
+}
+
+function judgeIsQuery<T>(judge: ((item: T) => boolean | undefined) | T | boolean | Query<T>): judge is Query<T> {
+    return judge instanceof Query;
 }

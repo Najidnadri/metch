@@ -1,4 +1,4 @@
-import { metch, MetchBranches, metchReturn, MetchReturnBranches } from '../src/index';
+import { metch, MetchBranches, metchReturn, MetchReturnBranches, Query } from '../src/index';
 
 async function readFile(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -20,6 +20,10 @@ async function readFile(path: string): Promise<string> {
   })
 }
 
+function returnStringUndefined(item: string | undefined): string | undefined {
+  return item
+}
+
 /**
  * METCH TEST SUITES
  */
@@ -29,17 +33,17 @@ describe('metch', () => {
 
     await metch(filePath, [
       [undefined, async (file) => {
-        return null
+        expect(true).toBe(false);
       }],
       ['animal.txt', async (file) => {
         const content = await readFile(file!);
         expect(content).toBe('Animal file content');
       }],
       [path => path!.includes('.txt'), async (file) => {
-        return null
+        expect(true).toBe(false);
       }]
     ], async (item) => {
-        return null
+      expect(true).toBe(false);
     });
   });
 
@@ -48,16 +52,16 @@ describe('metch', () => {
 
     metch(filePath, [
       [undefined, (file) => {
-        return null
+        expect(true).toBe(false);
       }],
       ['animal.txt', (file) => {
-        return null
+        expect(true).toBe(false);
       }],
       [path => path!.includes('.txt'), (file) => {
         expect(file).toBe('data.txt');
       }],
     ], async (item) => {
-        return null
+      expect(true).toBe(false);
     });
   });
 
@@ -66,13 +70,13 @@ describe('metch', () => {
 
     await metch(filePath, [
       [undefined, async (file) => {
-        return null
+        expect(true).toBe(false);
       }],
       ['animal.txt', async (file) => {
-        return null
+        expect(true).toBe(false);
       }],
       [path => path!.includes('.txt'), async (file) => {
-        return null
+        expect(true).toBe(false);
       }],
     ], async (item) => {
         const content = await readFile('default.txt');
@@ -101,7 +105,7 @@ describe('metch', () => {
   test('should execute the correct branch (async)', async () => {
     const branches: MetchBranches<any> = [
       [undefined, async (item) => {
-        return null
+        expect(true).toBe(false);
       }],
       [null, async (item) => {
         expect(item).toBeNull();
@@ -118,26 +122,26 @@ describe('metch', () => {
     ];
 
     await metch('animal', branches, (item) => {
-        return null
+      expect(true).toBe(false);
     });
   });
 
   test('should execute the default branch when no Metch is found', async () => {
     const branches: MetchBranches<any> = [
       [undefined, async (item) => {
-        return null
+        expect(true).toBe(false);
       }],
       [null, async (item) => {
-        return null
+        expect(true).toBe(false);
       }],
       [0, async (item) => {
-        return null
+        expect(true).toBe(false);
       }],
       ['animal', async (item) => {
-        return null
+        expect(true).toBe(false);
       }],
       [(path: any) => typeof path === 'string' && path.startsWith('prefix_'), async (item) => {
-        return null
+        expect(true).toBe(false);
       }]
     ];
 
@@ -301,3 +305,230 @@ describe('metchReturn', () => {
     expect(fileData).toBe('Default file content');
   });
 });
+
+
+
+
+/*
+ QUERIES TEST
+*/
+describe('queries', () => {
+
+
+  test('Simple query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('J'), name => name.endsWith('n'));
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+  test('Simple query should fail', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('N'), name => name.endsWith('any'));
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+  test('Simple nested query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('J'), 'Jackie Chan', Query.Or<string>(name => name.endsWith('n'), false));
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+  test('Simple nested query should failed', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('N'), 'Jackie Chan', Query.Or<string>(name => name.endsWith('ndad'), false));
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+  test('Complex nested query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(
+      name => name.startsWith('J'), 
+      'Jackie Chan', 
+      Query.Or<string>(
+        name => name.endsWith('n'), 
+        false,
+        Query.And<string>(
+          name => typeof name === 'string',
+          name => name.startsWith('Jackie'),
+          Query.Or<string>(
+            name => name.endsWith('Chan'),
+            name => name.endsWith('Ng')
+          )
+        )
+      )
+    );
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+
+  test('Complex nested query should failed', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(
+      name => name.startsWith('J'), 
+      'Jackie Chan', 
+      Query.Or<string>(
+        name => name.endsWith('a'), 
+        false,
+        Query.And<string>(
+          name => typeof name === 'string',
+          name => name.startsWith('Jackie'),
+          Query.Or<string>(
+            name => name.endsWith('Nick'),
+            name => name.endsWith('Ng')
+          )
+        )
+      )
+    );
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+})
+
+
+
+
+
+/*
+ QUERIES WITH METCH TEST
+*/
+describe('queries with metch', () => {
+
+
+  test('Simple query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('J'), name => name.endsWith('n'));
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+  test('Simple query should fail', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('N'), name => name.endsWith('any'));
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+  test('Simple nested query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('J'), 'Jackie Chan', Query.Or<string>(name => name.endsWith('n'), false));
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+  test('Simple nested query should failed', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(name => name.startsWith('N'), 'Jackie Chan', Query.Or<string>(name => name.endsWith('ndad'), false));
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+  test('Complex nested query should success', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(
+      name => name.startsWith('J'), 
+      'Jackie Chan', 
+      Query.Or<string>(
+        name => name.endsWith('n'), 
+        false,
+        Query.And<string>(
+          name => typeof name === 'string',
+          name => name.startsWith('Jackie'),
+          Query.Or<string>(
+            name => name.endsWith('Chan'),
+            name => name.endsWith('Ng')
+          )
+        )
+      )
+    );
+    expect(query.evaluate(name)).toBe(true);
+  })
+
+
+  test('Complex nested query should failed', () => {
+    const name = 'Jackie Chan'
+    const query = Query.And<string>(
+      name => name.startsWith('J'), 
+      'Jackie Chan', 
+      Query.Or<string>(
+        name => name.endsWith('a'), 
+        false,
+        Query.And<string>(
+          name => typeof name === 'string',
+          name => name.startsWith('Jackie'),
+          Query.Or<string>(
+            name => name.endsWith('Nick'),
+            name => name.endsWith('Ng')
+          )
+        )
+      )
+    );
+    expect(query.evaluate(name)).toBe(false);
+  })
+
+  test('should execute the correct branch (async)', async () => {
+    let filePath: string | undefined = returnStringUndefined('animal.txt');
+
+    await metch(filePath, [
+      [Query.Or<string | undefined>(undefined, path => path!.includes('.pdf')), async (file) => {
+        expect(true).toBe(false);
+      }],
+      ['animal.txt', async (file) => {
+        const content = await readFile(file!);
+        expect(content).toBe('Animal file content');
+      }],
+    ], async (item) => {
+      expect(true).toBe(false);
+    });
+  });
+
+  test('should execute the correct branch (sync)', () => {
+    let filePath: string | undefined = returnStringUndefined('data.txt');
+
+    metch(filePath, [
+      [Query.Or(undefined, 'animal.txt'), (file) => {
+        expect(true).toBe(false);
+      }],
+      [path => path?.endsWith('.txt'), (path) => {
+        expect(path).toBe('data.txt')
+      }]
+    ], async (item) => {
+      expect(true).toBe(false);
+    });
+  });
+
+  test('should execute the default branch', async () => {
+    let filePath: string | undefined = returnStringUndefined(undefined);;
+
+    await metch(filePath, [
+      [Query.Or<string | undefined>('asdw', 'animal.txt', path => path?.includes('.txt')), async (file) => {
+        expect(true).toBe(false);
+      }],
+    ], async (item) => {
+        const content = await readFile('default.txt');
+        expect(content).toBe('Default file content');
+    });
+  });
+
+  test('should execute the correct branch (async)', async () => {
+    const branches: MetchBranches<any> = [
+      [Query.Or<any>(undefined, null, 1, (path: any) => typeof path === 'boolean'), () => {
+        expect(true).toBe(false)
+      }],
+      [Query.And((path: any) => typeof path === 'string', 'animal'), (item) => {
+        expect(item).toBe('animal');
+      }],
+    ];
+
+    await metch('animal' as any, branches, (item) => {
+      expect(true).toBe(false);
+    });
+  });
+
+  test('should execute the default branch when no Metch is found', async () => {
+    const branches: MetchBranches<any> = [
+      [Query.Or<any>(undefined, null, 0, 'animal', (path: any) => typeof path === 'string' && path.startsWith('prefix_')), (item) => {
+        expect(true).toBe(false);
+      }],
+    ];
+
+    await metch(123, branches, async (item) => {
+        expect(item).toBe(123);
+    });
+  });
+})
