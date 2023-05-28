@@ -116,3 +116,94 @@ const fileData = await metchReturn(filePath, [
 
 console.log(fileData);
 ```
+
+# Judge
+Each branch inside `metch()` or `metchReturn()` has a `judge`. The item will be evaluated using this `judge`. If the `judge` allows it, then the callback inside that branch will be executed, and other branches will be ignored.
+
+A `judge<T>` (*Where `T` is the type of the `item` given*) can be one of the following :-
+* `boolean`
+* `(item: T) => boolean | undefined`
+* `T`
+* `Query<T>`
+
+## `boolean`
+Callback will be executed if `judge` is `true`.
+
+### Example
+```typescript
+let filePath: string | undefined = 'animal.txt';
+
+const fileData = await metchReturn(filePath, [
+    [true, async (file) => {
+        // Will always be executed and ignore other branches
+        return await fs.readFile("always.txt", "utf-8");
+    }]
+], async (file) => {
+    // Default Branch
+    return await fs.readFile('default.txt', 'utf-8')
+});
+```
+
+## `(item: T) => boolean | undefined`
+Callback will be executed if the result of the function is `true`.
+
+### Example
+```typescript
+let filePath: string = 'animal.txt';
+
+const fileData = await metchReturn(filePath, [
+    [(file) => file.endsWith('.txt'), async (file) => {
+        return await fs.readFile(file, "utf-8");
+    }]
+], async (file) => {
+    // Default Branch
+    return await fs.readFile('default.txt', 'utf-8')
+});
+```
+
+## `T`
+Callback will be executed if the `judge` is strictly equal to `item`. In this case `judge` must be the same type as `item`.
+
+### Example
+```typescript
+let filePath: string | undefined = 'animal.txt';
+
+const fileData = await metchReturn(filePath, [
+    [undefined, async () => {
+      return await fs.readFile('undefined.txt', 'utf-8')
+    }]
+    [(file) => file!.endsWith('.txt'), async (file) => {
+        return await fs.readFile(file, 'utf-8');
+    }]
+], async (file) => {
+    // Default Branch
+    return await fs.readFile('default.txt', 'utf-8')
+});
+```
+
+## `Query<T>`
+Act as `AND` / `OR` operator for a branch's judge.
+ 
+### Example
+```typescript
+const branches: MetchBranches<any> = [
+     [Query.Or<any>(undefined, null, 1, (path: any) => typeof path !== 'string'), () => {
+          console.log('value is not a valid string')
+      }],
+      [Query.And((path: any) => typeof path === 'string', 'animal'), (item) => {
+          console.log('value is a string and animal')
+      }],
+ ];
+ 
+ await metch('animal' as any, branches, (item) => {
+      console.log('default branch')
+ });
+ ```
+ 
+ ### Note
+ It is recommended to pass the `item`'s data type when using the `Query`.
+ ```typescript
+ let item: string | undefined = 'hello world';
+ Query.And<string | undefined>(...);
+ Query.Or<string | null>(...);
+ ```
